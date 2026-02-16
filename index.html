@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>This Is For Palku</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --bg:#0b0b0b;
+  --card:#141414;
+  --border:#2a2a2a;
+  --text:#f2f2f2;
+  --muted:#9a9a9a;
+  --accent:#ffffff;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:radial-gradient(circle at top,#111,#000);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--text);
+}
+
+.card{
+  width:92%;
+  max-width:420px;
+  background:rgba(20,20,20,.95);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:34px 30px;
+  text-align:center;
+  box-shadow:0 40px 90px rgba(0,0,0,.9);
+  animation:fade .6s ease;
+}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}
+}
+
+h1{
+  font-size:22px;
+  font-weight:500;
+  margin-bottom:14px;
+}
+
+p{
+  font-size:14px;
+  color:var(--muted);
+  line-height:1.6;
+  margin-bottom:22px;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  background:#0f0f0f;
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:14px;
+  font-size:14px;
+  cursor:pointer;
+  transition:.25s;
+}
+
+button:hover{
+  background:#161616;
+  transform:translateY(-1px);
+}
+
+.option{
+  margin-top:10px;
+}
+
+.hidden{display:none}
+
+.score{
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:14px;
+}
+
+.spark{
+  position:fixed;
+  width:4px;
+  height:14px;
+  background:white;
+  animation:spark 1.2s linear infinite;
+  opacity:.8;
+}
+
+@keyframes spark{
+  from{transform:translateY(100vh)}
+  to{transform:translateY(-10vh)}
+}
+</style>
+</head>
+
+<body>
+
+<div class="card" id="screen-start">
+  <h1>Do you want to play a game?</h1>
+  <p>A small game, made with intention.</p>
+  <button onclick="next('screen-rule')">Yes</button>
+</div>
+
+<div class="card hidden" id="screen-rule">
+  <p>If you win this game, you can give any dare you want.<br>No questions asked.</p>
+  <button onclick="next('screen-info')">OK</button>
+  <button onclick="next('screen-info')">Now start the game</button>
+</div>
+
+<div class="card hidden" id="screen-info">
+  <p>Total questions are 11.<br>You need to win <b>7</b> to succeed.<br>Play carefully.</p>
+  <button onclick="startGame()">Start</button>
+</div>
+
+<div class="card hidden" id="game">
+  <div class="score" id="scoreBox"></div>
+  <h1 id="question"></h1>
+  <div id="options"></div>
+</div>
+
+<div class="card hidden" id="result"></div>
+
+<script>
+let current=0;
+let score=0;
+
+const questions=[
+{
+ q:"How did we meet for the first time?",
+ o:["You shared a post","Through a friend","Random chat","At an event"],
+ a:0
+},
+{
+ q:"What nickname did I give you?",
+ o:["Palku","Pinky","Lulu","Sunny"],
+ a:0
+},
+{
+ q:"When is my birthday?",
+ o:["17 November","5 November","20 November","29 November"],
+ a:0
+},
+{
+ q:"What is my favourite color?",
+ o:["Black and White","Blue","Red","Green"],
+ a:0
+},
+{
+ q:"Favourite flower?",
+ o:["Rose and Lotus","Rose","Tulip","Lily"],
+ a:0
+},
+{
+ q:"What nickname did you give me?",
+ o:["Piku","Pikachu","Buddy","Hero"],
+ a:0
+},
+{
+ q:"Have I ever wished bad for you?",
+ o:["No","Yes","Sometimes","Not sure"],
+ a:0
+},
+{
+ q:"When we met, how old were you?",
+ o:["Doesn’t matter","18","19","20"],
+ a:0
+},
+{
+ q:"Have I ever used Snapchat for you?",
+ o:["Yes","No","Once","Never"],
+ a:0
+},
+{
+ q:"What is my dream?",
+ o:["Cinematographer","Photographer","Editor","All of these"],
+ a:3
+},
+{
+ q:"After you left, did I miss you?",
+ o:["Yes","No","Maybe","Sometimes"],
+ a:0
+}
+];
+
+function next(id){
+ document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
+ document.getElementById(id).classList.remove('hidden');
+}
+
+function startGame(){
+ next('game');
+ loadQuestion();
+}
+
+function loadQuestion(){
+ if(current>=questions.length){
+  endGame();
+  return;
+ }
+ document.getElementById("scoreBox").innerText=
+ `Question ${current+1} of ${questions.length} • Score ${score}`;
+ document.getElementById("question").innerText=questions[current].q;
+ const box=document.getElementById("options");
+ box.innerHTML="";
+ questions[current].o.forEach((opt,i)=>{
+  const b=document.createElement("button");
+  b.className="option";
+  b.innerText=opt;
+  b.onclick=()=>select(i);
+  box.appendChild(b);
+ });
+}
+
+function select(i){
+ if(i===questions[current].a) score++;
+ current++;
+ loadQuestion();
+}
+
+function endGame(){
+ next('result');
+ const r=document.getElementById("result");
+ if(score>=7){
+  r.innerHTML="<h1>YOU WON THE GAME</h1><p>You played it perfectly.</p>";
+  sparks();
+ }else{
+  r.innerHTML="<h1>Game Over</h1><p>Still special.</p>";
+ }
+}
+
+function sparks(){
+ for(let i=0;i<40;i++){
+  const s=document.createElement("div");
+  s.className="spark";
+  s.style.left=Math.random()*100+"vw";
+  s.style.animationDuration=(0.8+Math.random())+"s";
+  document.body.appendChild(s);
+  setTimeout(()=>s.remove(),2000);
+ }
+}
+</script>
+
+</body>
+</html>
